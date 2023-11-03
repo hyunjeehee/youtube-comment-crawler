@@ -9,7 +9,7 @@ api_obj = build('youtube', 'v3', developerKey=api_key)
 def get_keyword(keyword):
     search_response = api_obj.search().list(
             q=keyword,
-            order='viewCount',
+            order='date',
             part='snippet',
             maxResults=20
         ).execute()
