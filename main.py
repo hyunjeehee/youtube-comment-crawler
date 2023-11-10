@@ -9,6 +9,7 @@ api_obj = build('youtube', 'v3', developerKey=api_key)
 def get_keyword(keyword):
     search_response = api_obj.search().list(
             q=keyword,
+            type='video',
             order='date',
             part='snippet',
             maxResults=20
@@ -24,8 +25,9 @@ def get_keyword(keyword):
 
 
 def get_comment(video_id):
+    
     try:
-        response = api_obj.commentThreads().list(part='snippet,replies', videoId=video_id).execute()
+        response = api_obj.commentThreads().list(part='snippet,replies', videoId=video_id, maxResults = 100).execute()
     except:
         return
 
@@ -40,9 +42,10 @@ def get_comment(video_id):
                 for reply_item in item['replies']['comments']:
                     reply = reply_item['snippet']
                     comments.append([reply['textDisplay']])
-
+            
         if 'nextPageToken' in response:
-            response = api_obj.commentThreads().list(part='snippet,replies', videoId=video_id, pageToken=response['nextPageToken']).execute()
+            pageToken = response['nextPageToken']
+            response = api_obj.commentThreads().list(part='snippet,replies', videoId=video_id, pageToken = pageToken, maxResults = 100).execute()
         else:
             break
 
@@ -53,10 +56,14 @@ def get_comment(video_id):
 video_ids = get_keyword("다꾸")             #테스트용 키워드 "다꾸"
 
 comment_list=[]
+total_comments = 0
 for video_id in video_ids:
     comments = get_comment(video_id)
     if comments:
+        total_comments += len(comments)
         comment_list.extend(comments)
+
+print(f"Total comments collected: {total_comments}")  # Print the total comments count
 
 
 df = pandas.DataFrame(comment_list)
