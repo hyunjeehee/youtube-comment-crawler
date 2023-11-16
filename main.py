@@ -36,6 +36,8 @@ def get_comment(video_id, within_hours= None):
 
     comments = list()
     current_time = datetime.now(pytz.timezone('Asia/Seoul')).replace(tzinfo= None)
+    url = ("https://www.youtube.com/watch?v=" + video_id)
+
 
     while response:
         for item in response['items']:
@@ -46,12 +48,12 @@ def get_comment(video_id, within_hours= None):
 
             if within_hours is None:
                 comment_text = comment['textDisplay']
-                comments.append({'publishedAt': kst_date, 'comment': comment_text})
+                comments.append({'publishedAt': kst_date, 'comment': comment_text, 'url': url})
             else:
                 time_gap = current_time - comment_time
                 if time_gap <= timedelta(hours= within_hours):
                     comment_text = comment['textDisplay']
-                    comments.append({'publishedAt': kst_date, 'comment': comment_text})
+                    comments.append({'publishedAt': kst_date, 'comment': comment_text, 'url': url})
             
             if item['snippet']['totalReplyCount'] > 0:
                 for reply_item in item['replies']['comments']:
@@ -62,12 +64,12 @@ def get_comment(video_id, within_hours= None):
 
                     if within_hours is None:
                         reply_text = reply['textDisplay']
-                        comments.append({'publishedAt': kst_reply_date, 'comment': reply_text})
+                        comments.append({'publishedAt': kst_reply_date, 'comment': reply_text, 'url': url})
                     else:
                         reply_time_gap = current_time - reply_time
                         if reply_time_gap <= timedelta(hours= within_hours):
                             reply_text = reply['textDisplay']
-                            comments.append({'publishedAt': kst_reply_date, 'comment': reply_text})
+                            comments.append({'publishedAt': kst_reply_date, 'comment': reply_text, 'url': url})
 
         if 'nextPageToken' in response:
             pageToken = response['nextPageToken']
@@ -82,20 +84,22 @@ video_ids = get_keyword("김길수")  # 테스트용 키워드
 
 comment_list = []
 total_comments = 0
-hours_within = 8        # 몇 시간 내로 작성된 댓글 추출할 건지 ( None 입력 시 전체 댓글 추출 )
+hours_within = 24        # 몇 시간 내로 작성된 댓글 추출할 건지 ( None 입력 시 전체 댓글 추출 )
 
 for video_id in video_ids:
+    url = ("https://www.youtube.com/watch?v=" + video_id)
+    print(url)
     # print(video_id)
     comments = get_comment(video_id, hours_within)
     if comments:
         print(comments)
-        print("\n")
+        # print("\n")
         total_comments += len(comments)
         comment_list.extend(comments)
 
 if total_comments > 0:
-    df = pd.DataFrame(comment_list, columns= ['publishedAt', 'comment'])
-    df.to_excel('results.xlsx', columns=['publishedAt', 'comment'], index=None)
+    df = pd.DataFrame(comment_list, columns= ['publishedAt', 'comment','url'])
+    df.to_excel('results.xlsx', columns=['publishedAt', 'comment','url'], index=None)
     print(f"{hours_within} 시간 이내 작성된 댓글 개수: {total_comments}")
 else:
     print("지정된 시간 내에 작성된 댓글 없음")
