@@ -91,12 +91,6 @@ for video_id in video_ids:
     print(url)
     # print(video_id)
     comments = get_comment(video_id, hours_within)
-    # if comments:
-    #     print(comments)
-    #     # print("\n")
-    #     total_comments += len(comments)
-    #     comment_list.extend(comments)
-
     try:
         if comments:
             print(comments)
