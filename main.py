@@ -95,7 +95,7 @@ for video_id in video_ids:
             # print(comments)
             total_comments += len(comments)
             comment_list.extend(comments)
-            print(url + " 댓글 " + str(total_comments) + "개")
+            print(url + " 댓글 " + str(len(comments)) + "개")
         else:
             raise ValueError(url + " 댓글 0개")
     except ValueError as ve:
@@ -106,6 +106,6 @@ try:
         df = pd.DataFrame(comment_list, columns= ['publishedAt', 'comment','url'])
         df.to_excel('results.xlsx', columns=['publishedAt', 'comment','url'], index=None)
         print(f"\n{hours_within} 시간 이내 작성된 댓글 개수: {total_comments}")
-except KeyError:  
+except KeyError:
         print("지정된 시간 내에 작성된 댓글 없음")
 
