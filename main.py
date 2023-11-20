@@ -18,7 +18,7 @@ def get_keyword(keyword):
         type= 'video',
         order= 'date',
         part= 'snippet',
-        maxResults= 3
+        maxResults= 10
     ).execute()
 
     video_ids = []
@@ -84,23 +84,36 @@ video_ids = get_keyword("김길수")  # 테스트용 키워드
 
 comment_list = []
 total_comments = 0
-hours_within = 24        # 몇 시간 내로 작성된 댓글 추출할 건지 ( None 입력 시 전체 댓글 추출 )
+hours_within = 6        # 몇 시간 내로 작성된 댓글 추출할 건지 ( None 입력 시 전체 댓글 추출 )
 
 for video_id in video_ids:
     url = ("https://www.youtube.com/watch?v=" + video_id)
     print(url)
     # print(video_id)
     comments = get_comment(video_id, hours_within)
-    if comments:
-        print(comments)
-        # print("\n")
-        total_comments += len(comments)
-        comment_list.extend(comments)
+    # if comments:
+    #     print(comments)
+    #     # print("\n")
+    #     total_comments += len(comments)
+    #     comment_list.extend(comments)
 
-if total_comments > 0:
-    df = pd.DataFrame(comment_list, columns= ['publishedAt', 'comment','url'])
-    df.to_excel('results.xlsx', columns=['publishedAt', 'comment','url'], index=None)
-    print(f"{hours_within} 시간 이내 작성된 댓글 개수: {total_comments}")
-else:
-    print("지정된 시간 내에 작성된 댓글 없음")
+    try:
+        if comments:
+            print(comments)
+            # print("\n")
+            total_comments += len(comments)
+            comment_list.extend(comments)
+        else:
+            raise ValueError("댓글 없음")
+    except ValueError as ve:
+        print(f"{ve}")
+
+        
+try:
+    if total_comments > 0:
+        df = pd.DataFrame(comment_list, columns= ['publishedAt', 'comment','url'])
+        df.to_excel('results.xlsx', columns=['publishedAt', 'comment','url'], index=None)
+        print(f"{hours_within} 시간 이내 작성된 댓글 개수: {total_comments}")
+except KeyError:  
+        print("지정된 시간 내에 작성된 댓글 없음")
 
