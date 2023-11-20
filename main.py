@@ -79,35 +79,33 @@ def get_comment(video_id, within_hours= None):
 
     return comments
 
-
-video_ids = get_keyword("김길수")  # 테스트용 키워드 
+keyword = "김길수"      # 테스트용 키워드 
+video_ids = get_keyword(keyword)  
 
 comment_list = []
 total_comments = 0
-hours_within = 6        # 몇 시간 내로 작성된 댓글 추출할 건지 ( None 입력 시 전체 댓글 추출 )
+hours_within = 24        # 몇 시간 내로 작성된 댓글 추출할 건지 ( None 입력 시 전체 댓글 추출 )
 
+print("\"" + keyword + "\"" + "로 검색해서 " + str(hours_within) + "시간 이내의 댓글만 가지고 옵니다.\n")
 for video_id in video_ids:
     url = ("https://www.youtube.com/watch?v=" + video_id)
-    print(url)
-    # print(video_id)
     comments = get_comment(video_id, hours_within)
     try:
         if comments:
-            print(comments)
-            # print("\n")
+            # print(comments)
             total_comments += len(comments)
             comment_list.extend(comments)
+            print(url + " 댓글 " + str(total_comments) + "개")
         else:
-            raise ValueError("댓글 없음")
+            raise ValueError(url + " 댓글 0개")
     except ValueError as ve:
         print(f"{ve}")
-
         
 try:
     if total_comments > 0:
         df = pd.DataFrame(comment_list, columns= ['publishedAt', 'comment','url'])
         df.to_excel('results.xlsx', columns=['publishedAt', 'comment','url'], index=None)
-        print(f"{hours_within} 시간 이내 작성된 댓글 개수: {total_comments}")
+        print(f"\n{hours_within} 시간 이내 작성된 댓글 개수: {total_comments}")
 except KeyError:  
         print("지정된 시간 내에 작성된 댓글 없음")
 
